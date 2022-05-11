@@ -13,9 +13,8 @@ def validate_points(points: np.array) -> np.array:
         points = points[np.newaxis, ...]
     elif len(points.shape) == 1:
         print_detection_error_message_and_exit(points)
-    else:
-        if points.shape[1] != 2 or len(points.shape) > 2:
-            print_detection_error_message_and_exit(points)
+    elif points.shape[1] != 2 or len(points.shape) > 2:
+        print_detection_error_message_and_exit(points)
     return points
 
 
@@ -52,7 +51,7 @@ def print_objects_as_table(tracked_objects: Sequence):
 
 def get_terminal_size(default: Tuple[int, int] = (80, 24)) -> Tuple[int, int]:
     columns, lines = default
-    for fd in range(0, 3):  # First in order 0=Std In, 1=Std Out, 2=Std Error
+    for fd in range(3):  # First in order 0=Std In, 1=Std Out, 2=Std Error
         try:
             columns, lines = os.get_terminal_size(fd)
         except OSError:

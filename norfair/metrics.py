@@ -22,10 +22,7 @@ class InformationFile:
                 break
         else:
             raise ValueError(f"Couldn't find '{variable_name}' in {self.path}")
-        if result.isdigit():
-            return int(result)
-        else:
-            return result
+        return int(result) if result.isdigit() else result
 
 
 class PredictionsTextFile:
@@ -117,9 +114,10 @@ class DetectionFileParser:
             information_file = InformationFile(file_path=seqinfo_path)
         self.length = information_file.search(variable_name="seqLength")
 
-        self.sorted_by_frame = []
-        for frame_number in range(1, self.length + 1):
-            self.sorted_by_frame.append(self.get_dets_from_frame(frame_number))
+        self.sorted_by_frame = [
+            self.get_dets_from_frame(frame_number)
+            for frame_number in range(1, self.length + 1)
+        ]
 
     def get_dets_from_frame(self, frame_number):
         """ this function returns a list of norfair Detections class, corresponding to frame=frame_number """
@@ -224,9 +222,8 @@ class Accumulators:
         if not os.path.exists(save_path):
             os.makedirs(save_folder)
         metrics_path = os.path.join(save_path, file_name)
-        metrics_file = open(metrics_path, "w+")
-        metrics_file.write(self.summary)
-        metrics_file.close()
+        with open(metrics_path, "w+") as metrics_file:
+            metrics_file.write(self.summary)
 
     def print_metrics(self):
         print(self.summary)

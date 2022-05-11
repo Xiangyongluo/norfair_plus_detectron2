@@ -15,25 +15,25 @@ distance_threshold = 0.4
 
 class OpenposeDetector:
     def __init__(self):
-        config = {}
-        config["dir"] = openpose_install_path
-        config["logging_level"] = 3
-        config["output_resolution"] = "-1x-1"  # 320x176
-        config["net_resolution"] = "-1x768"  # 320x176
-        config["model_pose"] = "BODY_25"
-        config["alpha_pose"] = 0.6
-        config["scale_gap"] = 0.3
-        config["scale_number"] = 1
-        config["render_threshold"] = 0.05
-        config[
-            "num_gpu_start"
-        ] = 0  # If GPU version is built, and multiple GPUs are available, set the ID here
-        config["disable_blending"] = False
+        config = {
+            "dir": openpose_install_path,
+            "logging_level": 3,
+            "output_resolution": "-1x-1",
+            "net_resolution": "-1x768",
+            "model_pose": "BODY_25",
+            "alpha_pose": 0.6,
+            "scale_gap": 0.3,
+            "scale_number": 1,
+            "render_threshold": 0.05,
+            "num_gpu_start": 0,
+            "disable_blending": False,
+        }
+
         openpose_dir = config["dir"]
-        sys.path.append(openpose_dir + "/build/python/openpose")
+        sys.path.append(f"{openpose_dir}/build/python/openpose")
         from openpose import OpenPose  # noqa
 
-        config["default_model_folder"] = openpose_dir + "/models/"
+        config["default_model_folder"] = f"{openpose_dir}/models/"
         self.detector = OpenPose(config)
 
     def __call__(self, image):
@@ -69,13 +69,16 @@ for input_path in args.files:
         if i % frame_skip_period == 0:
             detected_poses = pose_detector(frame)
             detections = (
-                []
-                if not detected_poses.any()
-                else [
+                [
                     Detection(p, scores=s)
-                    for (p, s) in zip(detected_poses[:, :, :2], detected_poses[:, :, 2])
+                    for (p, s) in zip(
+                        detected_poses[:, :, :2], detected_poses[:, :, 2]
+                    )
                 ]
+                if detected_poses.any()
+                else []
             )
+
             tracked_objects = tracker.update(
                 detections=detections, period=frame_skip_period
             )

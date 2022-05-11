@@ -163,7 +163,7 @@ class Video:
         output_path_is_dir = os.path.isdir(self.output_path)
         if output_path_is_dir and self.input_path is not None:
             base_file_name = self.input_path.split("/")[-1].split(".")[0]
-            file_name = base_file_name + "_out.mp4"
+            file_name = f"{base_file_name}_out.mp4"
             return os.path.join(self.output_path, file_name)
         elif output_path_is_dir and self.camera is not None:
             file_name = f"camera_{self.camera}_out.mp4"
@@ -177,9 +177,9 @@ class Video:
 
         # Default codecs for each extension
         extension = filename[-3:].lower()
-        if "avi" == extension:
+        if extension == "avi":
             return "XVID"
-        elif "mp4" == extension:
+        elif extension == "mp4":
             return "mp4v"  # When available, "avc1" is better
         else:
             self._fail(
@@ -200,10 +200,7 @@ class Video:
         if len(description) < space_for_description:
             return description
         else:
-            return "{} ... {}".format(
-                description[: space_for_description // 2 - 3],
-                description[-space_for_description // 2 + 3 :],
-            )
+            return f"{description[: space_for_description // 2 - 3]} ... {description[-space_for_description // 2 + 3 :]}"
 
 
 class VideoFromFrames:
@@ -231,7 +228,7 @@ class VideoFromFrames:
         if not os.path.exists(videos_folder):
             os.makedirs(videos_folder)
 
-        video_path = os.path.join(videos_folder, file_name + ".mp4")
+        video_path = os.path.join(videos_folder, f"{file_name}.mp4")
         fourcc = cv2.VideoWriter_fourcc(*"mp4v")
 
         self.file_name = file_name

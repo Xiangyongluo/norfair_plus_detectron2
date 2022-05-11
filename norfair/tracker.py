@@ -64,18 +64,18 @@ class Tracker:
         )
 
         # Create new tracked objects from remaining unmatched detections
-        for detection in unmatched_detections:
-            self.tracked_objects.append(
-                TrackedObject(
-                    detection,
-                    self.hit_inertia_min,
-                    self.hit_inertia_max,
-                    self.initialization_delay,
-                    self.detection_threshold,
-                    self.period,
-                    self.point_transience,
-                )
+        self.tracked_objects.extend(
+            TrackedObject(
+                detection,
+                self.hit_inertia_min,
+                self.hit_inertia_max,
+                self.initialization_delay,
+                self.detection_threshold,
+                self.period,
+                self.point_transience,
             )
+            for detection in unmatched_detections
+        )
 
         return [p for p in self.tracked_objects if not p.is_initializing]
 
@@ -164,24 +164,23 @@ class Tracker:
         # NOTE: This implementation is terribly inefficient, but it doesn't
         #       seem to affect the fps at all.
         distance_matrix = distance_matrix.copy()
-        if distance_matrix.size > 0:
-            det_idxs = []
-            obj_idxs = []
+        if distance_matrix.size <= 0:
+            return [], []
+        det_idxs = []
+        obj_idxs = []
+        current_min = distance_matrix.min()
+
+        while current_min < self.distance_threshold:
+            flattened_arg_min = distance_matrix.argmin()
+            det_idx = flattened_arg_min // distance_matrix.shape[1]
+            obj_idx = flattened_arg_min % distance_matrix.shape[1]
+            det_idxs.append(det_idx)
+            obj_idxs.append(obj_idx)
+            distance_matrix[det_idx, :] = self.distance_threshold + 1
+            distance_matrix[:, obj_idx] = self.distance_threshold + 1
             current_min = distance_matrix.min()
 
-            while current_min < self.distance_threshold:
-                flattened_arg_min = distance_matrix.argmin()
-                det_idx = flattened_arg_min // distance_matrix.shape[1]
-                obj_idx = flattened_arg_min % distance_matrix.shape[1]
-                det_idxs.append(det_idx)
-                obj_idxs.append(obj_idx)
-                distance_matrix[det_idx, :] = self.distance_threshold + 1
-                distance_matrix[:, obj_idx] = self.distance_threshold + 1
-                current_min = distance_matrix.min()
-
-            return det_idxs, obj_idxs
-        else:
-            return [], []
+        return det_idxs, obj_idxs
 
 
 class TrackedObject:

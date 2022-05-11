@@ -115,20 +115,18 @@ def draw_debug_metrics(
 
     for obj in objects:
         if (
-            not (obj.last_detection.scores is None)
+            obj.last_detection.scores is not None
             and not (obj.last_detection.scores > draw_score_threshold).any()
         ):
             continue
-        if only_ids is not None:
-            if obj.id not in only_ids:
-                continue
-        if only_initializing_ids is not None:
-            if obj.initializing_id not in only_initializing_ids:
-                continue
-        if color is None:
-            text_color = Color.random(obj.initializing_id)
-        else:
-            text_color = color
+        if only_ids is not None and obj.id not in only_ids:
+            continue
+        if (
+            only_initializing_ids is not None
+            and obj.initializing_id not in only_initializing_ids
+        ):
+            continue
+        text_color = Color.random(obj.initializing_id) if color is None else color
         draw_position = centroid(
             obj.estimate[obj.last_detection.scores > draw_score_threshold]
             if obj.last_detection.scores is not None
@@ -160,12 +158,13 @@ def draw_debug_metrics(
 
         # No support for multiline text in opencv :facepalm:
         lines_to_draw = (
-            "{}|{}".format(obj.id, obj.initializing_id),
-            "a:{}".format(obj.age),
-            "h:{}".format(obj.hit_counter),
-            "ld:{}".format(last_dist),
-            "cd:{}".format(current_min_dist),
+            f"{obj.id}|{obj.initializing_id}",
+            f"a:{obj.age}",
+            f"h:{obj.hit_counter}",
+            f"ld:{last_dist}",
+            f"cd:{current_min_dist}",
         )
+
         for i, line in enumerate(lines_to_draw):
             draw_position = (
                 int(draw_position[0]),
@@ -231,7 +230,7 @@ def draw_tracked_boxes(
         id_size = frame_scale / 10
     if id_thickness is None:
         id_thickness = int(frame_scale / 5)
-    color_is_None = line_color == None
+    color_is_None = line_color is None
     for obj in objects:
         if not obj.live_points.any():
             continue
